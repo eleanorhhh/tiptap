@@ -1,0 +1,10 @@
+<h1>筆記歷史紀錄</h1>
+<ul>
+    {% for note in notes %}
+    <li>
+        <strong>時間：</strong> {{ note.created_at|date:"Y-m-d H:i" }} <br>
+        <strong>內容：</strong> {{ note.content_json.content.0.content.0.text|default:"(無文字內容)" }}
+        <hr>
+    </li>
+    {% endfor %}
+</ul>
