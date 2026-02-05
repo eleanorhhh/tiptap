@@ -15,7 +15,8 @@ def delete_note(request, note_id):
             return JsonResponse({'status': 'success'})
         except:
             return JsonResponse({'status': 'error'}, status=404)
-    
+
+@csrf_exempt   
 def save_note(request):
     if request.method == 'POST':
         try:

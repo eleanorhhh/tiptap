@@ -97,208 +97,208 @@
             </div>
         </div>
     </div>
-        <script type="module">
-            import { Editor, Extension } from 'https://esm.sh/@tiptap/core'
-            import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
-            import Suggestion from 'https://esm.sh/@tiptap/suggestion'
-            import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder'
+    <script type="module">
+        import { Editor, Extension } from 'https://esm.sh/@tiptap/core'
+        import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
+        import Suggestion from 'https://esm.sh/@tiptap/suggestion'
+        import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder'
 
-            const CustomSlashCommand = Extension.create({
-                name: 'customSlashCommand',
-                addProseMirrorPlugins() {
-                    return [
-                        Suggestion({
-                            editor: this.editor,
-                            char: '/',
-                            items: ({ query }) => {
-                                return [
-                                    { title: '標題 1', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run() },
-                                    { title: '標題 2', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run() },
-                                    { title: '粗體', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setMark('bold').run() },
-                                ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10)
-                            },
-                            render: () => {
-                                const menu = document.querySelector('#slash-menu');
-                                const list = document.querySelector('#menu-list');
-                                let selectedIndex = 0;
-                                let localItems = []; // 本地儲存當前的項目清單
-
-                                const updateSelection = () => {
-                                    const domItems = list.querySelectorAll('li');
-                                    domItems.forEach((li, index) => {
-                                        if (index === selectedIndex) {
-                                            li.style.backgroundColor = '#007bff';
-                                            li.style.color = 'white';
-                                        } else {
-                                            li.style.backgroundColor = 'transparent';
-                                            li.style.color = 'black';
-                                        }
-                                    });
-                                };
-
-                                return {
-                                    onStart: props => {
-                                        localItems = props.items || []; // 確保 items 存在
-                                        selectedIndex = 0;
-
-                                        list.innerHTML = localItems.map((item, index) =>
-                                            `<li style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;">${item.title}</li>`
-                                        ).join('');
-
-                                        const { clientRect } = props;
-                                        menu.style.display = 'block';
-                                        menu.style.left = `${clientRect().left}px`;
-                                        menu.style.top = `${clientRect().top + 25}px`;
-
-                                        window.currentProps = props;
-                                        updateSelection();
-
-                                        list.querySelectorAll('li').forEach((li, index) => {
-                                            li.onclick = () => window.executeSlash(index);
-                                        });
-                                    },
-
-                                    // 修正：使用更穩健的參數接收方式
-                                    onKeyDown: (props) => {
-                                        const { event } = props;
-                                        // 某些版本中 items 可能在 props.items 裡
-                                        const items = props.items || localItems;
-
-                                        if (!items || items.length === 0) return false;
-
-                                        if (event.key === 'ArrowUp') {
-                                            selectedIndex = (selectedIndex + items.length - 1) % items.length;
-                                            updateSelection();
-                                            return true;
-                                        }
-
-                                        if (event.key === 'ArrowDown') {
-                                            selectedIndex = (selectedIndex + 1) % items.length;
-                                            updateSelection();
-                                            return true;
-                                        }
-
-                                        if (event.key === 'Enter') {
-                                            window.executeSlash(selectedIndex);
-                                            return true;
-                                        }
-
-                                        return false;
-                                    },
-
-                                    onExit: () => {
-                                        menu.style.display = 'none';
-                                        localItems = [];
-                                    },
-                                }
-                            }
-                        }),
-                    ]
-                },
-            })
-
-            const editor = new Editor({
-                element: document.querySelector('#editor'),
-                extensions: [
-                    StarterKit,
-                    CustomSlashCommand,
-                    // 2. 啟動 Placeholder 擴展
-                    Placeholder.configure({
-                        // 它會去讀取 HTML 上的 data-placeholder 屬性
-                        placeholder: ({ node }) => {
-                            return document.querySelector('#editor').getAttribute('data-placeholder')
+        const CustomSlashCommand = Extension.create({
+            name: 'customSlashCommand',
+            addProseMirrorPlugins() {
+                return [
+                    Suggestion({
+                        editor: this.editor,
+                        char: '/',
+                        items: ({ query }) => {
+                            return [
+                                { title: '標題 1', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run() },
+                                { title: '標題 2', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run() },
+                                { title: '粗體', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setMark('bold').run() },
+                            ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10)
                         },
-                    }),
-                ],
-                content: '', // 保持為空
-                autofocus: true,
-            })
+                        render: () => {
+                            const menu = document.querySelector('#slash-menu');
+                            const list = document.querySelector('#menu-list');
+                            let selectedIndex = 0;
+                            let localItems = []; // 本地儲存當前的項目清單
 
+                            const updateSelection = () => {
+                                const domItems = list.querySelectorAll('li');
+                                domItems.forEach((li, index) => {
+                                    if (index === selectedIndex) {
+                                        li.style.backgroundColor = '#007bff';
+                                        li.style.color = 'white';
+                                    } else {
+                                        li.style.backgroundColor = 'transparent';
+                                        li.style.color = 'black';
+                                    }
+                                });
+                            };
 
-            window.toggleBold = () => editor.chain().focus().toggleBold().run();
-            window.toggleHeading = () => editor.chain().focus().toggleHeading({ level: 1 }).run();
+                            return {
+                                onStart: props => {
+                                    localItems = props.items || []; // 確保 items 存在
+                                    selectedIndex = 0;
 
-            window.executeSlash = (index) => {
-                const props = window.currentProps;
-                if (props && props.items[index]) {
-                    props.items[index].command(props);
-                    document.querySelector('#slash-menu').style.display = 'none';
-                }
-            };
+                                    list.innerHTML = localItems.map((item, index) =>
+                                        `<li style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;">${item.title}</li>`
+                                    ).join('');
 
-            // 儲存至 django
-            window.saveContent = async () => {
-                const jsonContent = editor.getJSON();
-                
-                try {
-                    const response = await fetch('http://127.0.0.1:8000/api/save/', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ body_content: jsonContent })
-                    });
-                    const result = await response.json();
+                                    const { clientRect } = props;
+                                    menu.style.display = 'block';
+                                    menu.style.left = `${clientRect().left}px`;
+                                    menu.style.top = `${clientRect().top + 25}px`;
 
-                    if (response.ok) {
-                        alert('儲存成功！ID: ' + result.id);
-                            
-                        // --- 關鍵修正：儲存成功後，立即重新整理下方紀錄 ---
-                        // 建議呼叫 loadHistoryList，因為你的代碼中它包含了還原功能
-                        if (typeof loadHistoryList === 'function') {
-                            loadHistoryList();
+                                    window.currentProps = props;
+                                    updateSelection();
+
+                                    list.querySelectorAll('li').forEach((li, index) => {
+                                        li.onclick = () => window.executeSlash(index);
+                                    });
+                                },
+
+                                // 修正：使用更穩健的參數接收方式
+                                onKeyDown: (props) => {
+                                    const { event } = props;
+                                    // 某些版本中 items 可能在 props.items 裡
+                                    const items = props.items || localItems;
+
+                                    if (!items || items.length === 0) return false;
+
+                                    if (event.key === 'ArrowUp') {
+                                        selectedIndex = (selectedIndex + items.length - 1) % items.length;
+                                        updateSelection();
+                                        return true;
+                                    }
+
+                                    if (event.key === 'ArrowDown') {
+                                        selectedIndex = (selectedIndex + 1) % items.length;
+                                        updateSelection();
+                                        return true;
+                                    }
+
+                                    if (event.key === 'Enter') {
+                                        window.executeSlash(selectedIndex);
+                                        return true;
+                                    }
+
+                                    return false;
+                                },
+
+                                onExit: () => {
+                                    menu.style.display = 'none';
+                                    localItems = [];
+                                },
+                            }
                         }
-                        // 如果你想用另一個函式名，也可以改呼叫 refreshHistoryList();
+                    }),
+                ]
+            },
+        })
+
+        const editor = new Editor({
+            element: document.querySelector('#editor'),
+            extensions: [
+                StarterKit,
+                CustomSlashCommand,
+                // 2. 啟動 Placeholder 擴展
+                Placeholder.configure({
+                    // 它會去讀取 HTML 上的 data-placeholder 屬性
+                    placeholder: ({ node }) => {
+                        return document.querySelector('#editor').getAttribute('data-placeholder')
+                    },
+                }),
+            ],
+            content: '', // 保持為空
+            autofocus: true,
+        })
+
+
+        window.toggleBold = () => editor.chain().focus().toggleBold().run();
+        window.toggleHeading = () => editor.chain().focus().toggleHeading({ level: 1 }).run();
+
+        window.executeSlash = (index) => {
+            const props = window.currentProps;
+            if (props && props.items[index]) {
+                props.items[index].command(props);
+                document.querySelector('#slash-menu').style.display = 'none';
+            }
+        };
+
+        // 儲存至 django
+        window.saveContent = async () => {
+            const jsonContent = editor.getJSON();
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/save/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ body_content: jsonContent })
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('儲存成功！ID: ' + result.id);
+
+                    // --- 關鍵修正：儲存成功後，立即重新整理下方紀錄 ---
+                    // 建議呼叫 loadHistoryList，因為你的代碼中它包含了還原功能
+                    if (typeof loadHistoryList === 'function') {
+                        loadHistoryList();
                     }
-                } catch (e) {
-                    alert('儲存失敗，請檢查 Django 伺服器是否開啟');
+                    // 如果你想用另一個函式名，也可以改呼叫 refreshHistoryList();
                 }
-            };
+            } catch (e) {
+                alert('儲存失敗，請檢查 Django 伺服器是否開啟');
+            }
+        };
 
-            async function refreshHistoryList() {
-                try {
-                    const response = await fetch('http://127.0.0.1:8000/api/load_all/');
-                    const result = await response.json();
-                    const historyList = document.querySelector('#history-list');
+        async function refreshHistoryList() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/load_all/');
+                const result = await response.json();
+                const historyList = document.querySelector('#history-list');
 
-                    if (result.status === 'success' && result.notes) {
-                        // 將所有筆記映射成 HTML 字串
-                        historyList.innerHTML = result.notes.map(note => {
-                            // 安全地取得第一行文字作為預覽
-                            const previewText = note.body_content?.content?.[0]?.content?.[0]?.text || "無標題";
-                            return `
+                if (result.status === 'success' && result.notes) {
+                    // 將所有筆記映射成 HTML 字串
+                    historyList.innerHTML = result.notes.map(note => {
+                        // 安全地取得第一行文字作為預覽
+                        const previewText = note.body_content?.content?.[0]?.content?.[0]?.text || "無標題";
+                        return `
                             <div style="padding: 10px; border: 1px solid #eee; margin-bottom: 5px; cursor: pointer; border-radius: 4px;" 
                                 onclick="restoreNote(${JSON.stringify(note.body_content).replace(/"/g, '&quot;')})">
                                 <strong>${previewText}</strong>
                                 <div style="font-size: 12px; color: #888;">${note.created_at}</div>
                             </div>
                         `;
-                        }).join('');
-                    }
-                } catch (error) {
-                    console.error('載入歷史清單失敗:', error);
+                    }).join('');
                 }
+            } catch (error) {
+                console.error('載入歷史清單失敗:', error);
             }
+        }
 
-            // 點擊後將內容放回編輯器
-            window.restoreNote = (content) => {
-                editor.commands.setContent(content);
-            };
+        // 點擊後將內容放回編輯器
+        window.restoreNote = (content) => {
+            editor.commands.setContent(content);
+        };
 
-            // 初始執行
-            refreshHistoryList();
-            // 1. 抓取所有筆記並顯示在歷史清單
-            async function loadHistoryList() {
-                try {
-                    // 使用你之前測試成功的 API 概念
-                    const response = await fetch('http://127.0.0.1:8000/api/load_all/');
-                    const result = await response.json();
-                    const historyList = document.querySelector('#history-list');
+        // 初始執行
+        refreshHistoryList();
+        // 1. 抓取所有筆記並顯示在歷史清單
+        async function loadHistoryList() {
+            try {
+                // 使用你之前測試成功的 API 概念
+                const response = await fetch('http://127.0.0.1:8000/api/load_all/');
+                const result = await response.json();
+                const historyList = document.querySelector('#history-list');
 
-                    if (result.status === 'success' && result.notes.length > 0) {
-                        historyList.innerHTML = result.notes.map(note => {
-                            const previewText = note.body_content?.content?.[0]?.content?.[0]?.text || "無文字內容";
-                            const date = new Date(note.created_at).toLocaleString();
+                if (result.status === 'success' && result.notes.length > 0) {
+                    historyList.innerHTML = result.notes.map(note => {
+                        const previewText = note.body_content?.content?.[0]?.content?.[0]?.text || "無文字內容";
+                        const date = new Date(note.created_at).toLocaleString();
 
-                            return `
+                        return `
         <div style="padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
             <div onclick="restoreNoteById(${note.id})" style="cursor: pointer; flex-grow: 1;">
                 <div style="font-weight: bold; color: #333;">${previewText}</div>
@@ -308,53 +308,52 @@
                     style="background: #ff4d4f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
                 刪除
             </button>
-        </div>
-    `;
-                        }).join('');
-                    } else {
-                        historyList.innerHTML = "目前尚無任何紀錄。";
-                    }
-                } catch (error) {
-                    console.log("尚未實作 load_all API 或連線失敗");
+        </div>`;
+                    }).join('');
+                } else {
+                    historyList.innerHTML = "目前尚無任何紀錄。";
                 }
+            } catch (error) {
+                console.log("尚未實作 load_all API 或連線失敗");
             }
+        }
 
-            // 2. 讓點擊歷史紀錄可以還原內容
-            window.restoreNoteById = async (id) => {
-                try {
-                    // 透過 ID 讀取特定筆記
-                    const response = await fetch(`http://127.0.0.1:8000/api/load/?id=${id}`);
-                    const result = await response.json();
+        // 2. 讓點擊歷史紀錄可以還原內容
+        window.restoreNoteById = async (id) => {
+            try {
+                // 透過 ID 讀取特定筆記
+                const response = await fetch(`http://127.0.0.1:8000/api/load/?id=${id}`);
+                const result = await response.json();
 
-                    if (result.status === 'success' && result.body_content) {
-                        editor.commands.setContent(result.body_content);
-                        window.scrollTo({ top: 0, behavior: 'smooth' }); // 捲動回頂端編輯
-                    }
-                } catch (error) {
-                    alert("還原筆記失敗");
+                if (result.status === 'success' && result.body_content) {
+                    editor.commands.setContent(result.body_content);
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); // 捲動回頂端編輯
                 }
-            };
+            } catch (error) {
+                alert("還原筆記失敗");
+            }
+        };
 
-            // 初始執行載入清單
-            loadHistoryList();
-            window.deleteNote = async (id) => {
-                if (!confirm('確定要刪除這筆筆記嗎？')) return;
+        // 初始執行載入清單
+        loadHistoryList();
+        window.deleteNote = async (id) => {
+            if (!confirm('確定要刪除這筆筆記嗎？')) return;
 
-                try {
-                    const response = await fetch(`http://127.0.0.1:8000/api/delete/${id}/`, {
-                        method: 'DELETE',
-                    });
-                    const result = await response.json();
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/delete/${id}/`, {
+                    method: 'DELETE',
+                });
+                const result = await response.json();
 
-                    if (result.status === 'success') {
-                        alert('刪除成功');
-                        loadHistoryList(); // 關鍵：刪除後立即重新整理清單，頁面不需要刷新！
-                    }
-                } catch (error) {
-                    alert('刪除失敗，請檢查網路連線');
+                if (result.status === 'success') {
+                    alert('刪除成功');
+                    loadHistoryList(); // 關鍵：刪除後立即重新整理清單，頁面不需要刷新！
                 }
-            };
-        </script>
+            } catch (error) {
+                alert('刪除失敗，請檢查網路連線');
+            }
+        };
+    </script>
 </body>
 
 </html>
