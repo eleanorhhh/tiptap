@@ -17,15 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView # 新增這行
-from core.views import save_note
-from core.views import save_note, get_latest_note,get_all_notes,delete_note
+from core.views import save_note,get_all_notes,delete_note,get_note_by_id
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/save/', save_note),
     # 新增下面這行，把首頁對接到 index.html
     path('', TemplateView.as_view(template_name='index.html')), 
-    path('api/load/', get_latest_note),
+    path('api/load/', get_note_by_id),
     path('api/load_all/', get_all_notes),
-    path('api/delete/<int:note_id>/', delete_note),
+    path('api/delete/<str:note_id>/', delete_note),
 ]

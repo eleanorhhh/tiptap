@@ -3,106 +3,191 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>我的 Tiptap 學習筆記</title>
+    <title>My Tiptap Workspace</title>
     <style>
+        /* 基礎樣式與 Notion 配色 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            color: #37352f;
+            /* Notion 經典深灰色 */
+            background-color: #ffffff;
+        }
+
+        /* 側邊欄佈局結構 */
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #f7f6f3;
+            /* 淺米色背景 */
+            border-right: 1px solid #edece9;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 12px;
+            overflow-y: auto;
+        }
+
+        .editor-workspace {
+            flex: 1;
+            overflow-y: auto;
+            padding: 60px 100px;
+        }
+
+        /* 編輯器容器優化 */
         .editor-container {
-            border: 2px solid #ccc;
-            padding: 20px;
-            border-radius: 8px;
-            min-height: 200px;
-            margin-top: 10px;
+            border: none !important;
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 16px;
+            line-height: 1.6;
             outline: none;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            min-height: 300px;
         }
 
-        /* CSS 實作 Placeholder */
-        #editor:empty::before {
-            content: attr(data-placeholder);
-            color: #adb5bd;
-            font-style: italic;
-            pointer-events: none;
-        }
-
-        /* 修正後的 Placeholder CSS */
-        .ProseMirror p.is-editor-empty:first-child::before {
-            content: attr(data-placeholder);
-            float: left;
-            color: #adb5bd;
-            /* 透明感的灰色 */
-            pointer-events: none;
-            height: 0;
-        }
-
-        .ProseMirror:focus {
-            outline: none;
+        .toolbar {
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            display: flex;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f1f1;
         }
 
         .toolbar button {
-            margin-right: 5px;
-            padding: 5px 10px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 5px 12px;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
         }
 
-        /* 選單樣式強化 */
+        .toolbar button:hover {
+            background: #f1f1f1;
+        }
+
+        .save-btn {
+            background: #2383e2 !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        /* 側邊欄紀錄樣式 */
+        .history-item {
+            padding: 8px 12px;
+            margin-bottom: 2px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .history-item:hover {
+            background-color: #ebebeb;
+        }
+
+        .history-item .title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+        }
+
+        .history-item .del-btn {
+            color: #999;
+            font-size: 12px;
+            opacity: 0;
+            padding: 2px 5px;
+        }
+
+        .history-item:hover .del-btn {
+            opacity: 1;
+        }
+
+        /* Slash Menu 樣式 */
         #slash-menu {
             display: none;
             position: absolute;
             background: white;
             border: 1px solid #ddd;
             z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-radius: 6px;
-            width: 150px;
+            width: 170px;
         }
 
         #menu-list {
             list-style: none;
-            padding: 0;
+            padding: 5px 0;
             margin: 0;
         }
 
         #menu-list li {
-            padding: 10px;
+            padding: 8px 15px;
             cursor: pointer;
-            border-bottom: 1px solid #eee;
+            font-size: 14px;
         }
 
-        /* 關鍵：選中時的背景顏色 */
-        #menu-list li.selected {
-            background-color: #007bff;
-            color: white;
+        /* Placeholder 樣式 */
+        .ProseMirror p.is-editor-empty:first-child::before {
+            content: attr(data-placeholder);
+            float: left;
+            color: #adb5bd;
+            pointer-events: none;
+            height: 0;
         }
     </style>
 </head>
 
 <body>
+    <div style="max-width: 800px; margin: 0 auto 10px auto;">
+        <input type="text" id="note-title" placeholder="請輸入筆記標題..."
+            style="width: 100%; border: none; font-size: 24px; font-weight: bold; outline: none; padding: 10px 0;">
+    </div>
+    <div class="main-container">
+        <div class="sidebar">
+            <button onclick="createNewNote()"
+                style="background: #ffffff; border: 1px solid #ddd; padding: 8px; border-radius: 6px; margin-bottom: 20px; cursor: pointer; width: 100%; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <span style="font-size: 18px;">+</span> 新增筆記
+            </button>
 
-    <h2>Tiptap 編輯器測試</h2>
-    <div class="toolbar">
-        <button onclick="toggleBold()">加粗 (Bold)</button>
-        <button onclick="toggleHeading()">標題 (H1)</button>
-        <button onclick="saveContent()">儲存到 Django</button>
+            <h3
+                style="font-size: 12px; color: #91918e; margin: 0 0 15px 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                歷史頁面</h3>
+            <div id="history-list"></div>
+        </div>
+
+        <div class="editor-workspace">
+            <div class="toolbar">
+                <button onclick="toggleBold()"><b>B</b></button>
+                <button onclick="toggleHeading()">H1</button>
+                <button onclick="saveContent()" class="save-btn">儲存筆記</button>
+            </div>
+
+            <div id="editor" class="editor-container" data-placeholder="輸入 '/' 開啟指令選單..."></div>
+        </div>
     </div>
 
     <div id="slash-menu">
         <ul id="menu-list"></ul>
     </div>
 
-    <div id="editor" class="editor-container" data-placeholder="輸入 / 測試鍵盤選擇！"></div>
-    <div style="margin-top: 50px;">
-        <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
-            <h3>📝 歷史筆記紀錄</h3>
-            <div id="history-list" style="display: flex; flex-direction: column; gap: 10px;">
-            </div>
-        </div>
-    </div>
     <script type="module">
         import { Editor, Extension } from 'https://esm.sh/@tiptap/core'
         import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
         import Suggestion from 'https://esm.sh/@tiptap/suggestion'
         import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder'
 
+        // Slash Command 擴充邏輯
         const CustomSlashCommand = Extension.create({
             name: 'customSlashCommand',
             addProseMirrorPlugins() {
@@ -114,82 +199,51 @@
                             return [
                                 { title: '標題 1', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run() },
                                 { title: '標題 2', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run() },
-                                { title: '粗體', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setMark('bold').run() },
+                                { title: '粗體文字', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setMark('bold').run() },
                             ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10)
                         },
                         render: () => {
                             const menu = document.querySelector('#slash-menu');
                             const list = document.querySelector('#menu-list');
                             let selectedIndex = 0;
-                            let localItems = []; // 本地儲存當前的項目清單
+                            let localItems = [];
 
                             const updateSelection = () => {
-                                const domItems = list.querySelectorAll('li');
-                                domItems.forEach((li, index) => {
-                                    if (index === selectedIndex) {
-                                        li.style.backgroundColor = '#007bff';
-                                        li.style.color = 'white';
-                                    } else {
-                                        li.style.backgroundColor = 'transparent';
-                                        li.style.color = 'black';
-                                    }
+                                list.querySelectorAll('li').forEach((li, index) => {
+                                    li.style.backgroundColor = index === selectedIndex ? '#f1f1f1' : 'transparent';
                                 });
                             };
 
                             return {
                                 onStart: props => {
-                                    localItems = props.items || []; // 確保 items 存在
+                                    localItems = props.items || [];
                                     selectedIndex = 0;
-
-                                    list.innerHTML = localItems.map((item, index) =>
-                                        `<li style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;">${item.title}</li>`
-                                    ).join('');
-
-                                    const { clientRect } = props;
+                                    list.innerHTML = localItems.map(item => `<li>${item.title}</li>`).join('');
                                     menu.style.display = 'block';
+                                    const { clientRect } = props;
                                     menu.style.left = `${clientRect().left}px`;
                                     menu.style.top = `${clientRect().top + 25}px`;
-
                                     window.currentProps = props;
                                     updateSelection();
-
                                     list.querySelectorAll('li').forEach((li, index) => {
                                         li.onclick = () => window.executeSlash(index);
                                     });
                                 },
-
-                                // 修正：使用更穩健的參數接收方式
                                 onKeyDown: (props) => {
-                                    const { event } = props;
-                                    // 某些版本中 items 可能在 props.items 裡
-                                    const items = props.items || localItems;
-
-                                    if (!items || items.length === 0) return false;
-
-                                    if (event.key === 'ArrowUp') {
-                                        selectedIndex = (selectedIndex + items.length - 1) % items.length;
-                                        updateSelection();
-                                        return true;
+                                    if (props.event.key === 'ArrowUp') {
+                                        selectedIndex = (selectedIndex + localItems.length - 1) % localItems.length;
+                                        updateSelection(); return true;
                                     }
-
-                                    if (event.key === 'ArrowDown') {
-                                        selectedIndex = (selectedIndex + 1) % items.length;
-                                        updateSelection();
-                                        return true;
+                                    if (props.event.key === 'ArrowDown') {
+                                        selectedIndex = (selectedIndex + 1) % localItems.length;
+                                        updateSelection(); return true;
                                     }
-
-                                    if (event.key === 'Enter') {
-                                        window.executeSlash(selectedIndex);
-                                        return true;
+                                    if (props.event.key === 'Enter') {
+                                        window.executeSlash(selectedIndex); return true;
                                     }
-
                                     return false;
                                 },
-
-                                onExit: () => {
-                                    menu.style.display = 'none';
-                                    localItems = [];
-                                },
+                                onExit: () => { menu.style.display = 'none'; }
                             }
                         }
                     }),
@@ -202,22 +256,18 @@
             extensions: [
                 StarterKit,
                 CustomSlashCommand,
-                // 2. 啟動 Placeholder 擴展
                 Placeholder.configure({
-                    // 它會去讀取 HTML 上的 data-placeholder 屬性
-                    placeholder: ({ node }) => {
-                        return document.querySelector('#editor').getAttribute('data-placeholder')
-                    },
+                    placeholder: ({ node }) => document.querySelector('#editor').getAttribute('data-placeholder'),
                 }),
             ],
-            content: '', // 保持為空
+            content: '',
             autofocus: true,
         })
 
-
+        // 全域功能函式掛載
+        window.currentNoteId = null;
         window.toggleBold = () => editor.chain().focus().toggleBold().run();
         window.toggleHeading = () => editor.chain().focus().toggleHeading({ level: 1 }).run();
-
         window.executeSlash = (index) => {
             const props = window.currentProps;
             if (props && props.items[index]) {
@@ -226,133 +276,106 @@
             }
         };
 
-        // 儲存至 django
+        // 儲存邏輯
+        // index.html
         window.saveContent = async () => {
             const jsonContent = editor.getJSON();
+            const titleInput = document.querySelector('#note-title');
+            const titleValue = titleInput ? titleInput.value : "未命名筆記";
 
             try {
                 const response = await fetch('http://127.0.0.1:8000/api/save/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ body_content: jsonContent })
+                    body: JSON.stringify({
+                        id: window.currentNoteId, // 加上當前筆記的 ID (若為新建則為 null)
+                        title: titleValue,
+                        body_content: jsonContent
+                    })
                 });
-                const result = await response.json();
 
                 if (response.ok) {
-                    alert('儲存成功！ID: ' + result.id);
-
-                    // --- 關鍵修正：儲存成功後，立即重新整理下方紀錄 ---
-                    // 建議呼叫 loadHistoryList，因為你的代碼中它包含了還原功能
-                    if (typeof loadHistoryList === 'function') {
-                        loadHistoryList();
-                    }
-                    // 如果你想用另一個函式名，也可以改呼叫 refreshHistoryList();
+                    const result = await response.json();
+                    window.currentNoteId = result.id; // 儲存成功後，將 ID 設為後端回傳的主鍵，確保後續操作都是 Update
+                    alert('儲存成功！');
+                    loadHistoryList();
+                } else {
+                    const error = await response.json();
+                    console.error('後端報錯:', error);
+                    alert('儲存失敗：' + error.message);
                 }
             } catch (e) {
-                alert('儲存失敗，請檢查 Django 伺服器是否開啟');
+                alert('連線失敗，請檢查伺服器是否開啟');
             }
         };
 
-        async function refreshHistoryList() {
+        // 載入歷史清單
+        window.loadHistoryList = async () => {
             try {
                 const response = await fetch('http://127.0.0.1:8000/api/load_all/');
                 const result = await response.json();
                 const historyList = document.querySelector('#history-list');
 
-                if (result.status === 'success' && result.notes) {
-                    // 將所有筆記映射成 HTML 字串
+                if (result.status === 'success' && result.notes && result.notes.length > 0) {
                     historyList.innerHTML = result.notes.map(note => {
-                        // 安全地取得第一行文字作為預覽
-                        const previewText = note.body_content?.content?.[0]?.content?.[0]?.text || "無標題";
+                        const displayTitle = note.title || "未命名筆記";
+
+                        // 注意底下 ${note.id} 外面包了一層單引號 ''
                         return `
-                            <div style="padding: 10px; border: 1px solid #eee; margin-bottom: 5px; cursor: pointer; border-radius: 4px;" 
-                                onclick="restoreNote(${JSON.stringify(note.body_content).replace(/"/g, '&quot;')})">
-                                <strong>${previewText}</strong>
-                                <div style="font-size: 12px; color: #888;">${note.created_at}</div>
-                            </div>
-                        `;
-                    }).join('');
-                }
-            } catch (error) {
-                console.error('載入歷史清單失敗:', error);
-            }
-        }
-
-        // 點擊後將內容放回編輯器
-        window.restoreNote = (content) => {
-            editor.commands.setContent(content);
-        };
-
-        // 初始執行
-        refreshHistoryList();
-        // 1. 抓取所有筆記並顯示在歷史清單
-        async function loadHistoryList() {
-            try {
-                // 使用你之前測試成功的 API 概念
-                const response = await fetch('http://127.0.0.1:8000/api/load_all/');
-                const result = await response.json();
-                const historyList = document.querySelector('#history-list');
-
-                if (result.status === 'success' && result.notes.length > 0) {
-                    historyList.innerHTML = result.notes.map(note => {
-                        const previewText = note.body_content?.content?.[0]?.content?.[0]?.text || "無文字內容";
-                        const date = new Date(note.created_at).toLocaleString();
-
-                        return `
-        <div style="padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-            <div onclick="restoreNoteById(${note.id})" style="cursor: pointer; flex-grow: 1;">
-                <div style="font-weight: bold; color: #333;">${previewText}</div>
-                <div style="font-size: 12px; color: #888;">${date}</div>
-            </div>
-            <button onclick="deleteNote(${note.id})" 
-                    style="background: #ff4d4f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                刪除
-            </button>
-        </div>`;
+                    <div class="history-item" onclick="restoreNoteById('${note.id}')">
+                        <span class="title">${displayTitle}</span>
+                        <span class="del-btn" onclick="event.stopPropagation(); deleteNote('${note.id}')">✕</span>
+                    </div>`;
                     }).join('');
                 } else {
-                    historyList.innerHTML = "目前尚無任何紀錄。";
+                    historyList.innerHTML = "<div style='color:#91918e; font-size:13px; padding-left:10px;'>尚未有筆記</div>";
                 }
             } catch (error) {
-                console.log("尚未實作 load_all API 或連線失敗");
+                console.error("載入紀錄失敗:", error);
             }
-        }
+        };
 
-        // 2. 讓點擊歷史紀錄可以還原內容
+        // 還原與刪除功能
         window.restoreNoteById = async (id) => {
             try {
-                // 透過 ID 讀取特定筆記
                 const response = await fetch(`http://127.0.0.1:8000/api/load/?id=${id}`);
                 const result = await response.json();
-
-                if (result.status === 'success' && result.body_content) {
-                    editor.commands.setContent(result.body_content);
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); // 捲動回頂端編輯
-                }
-            } catch (error) {
-                alert("還原筆記失敗");
-            }
-        };
-
-        // 初始執行載入清單
-        loadHistoryList();
-        window.deleteNote = async (id) => {
-            if (!confirm('確定要刪除這筆筆記嗎？')) return;
-
-            try {
-                const response = await fetch(`http://127.0.0.1:8000/api/delete/${id}/`, {
-                    method: 'DELETE',
-                });
-                const result = await response.json();
-
                 if (result.status === 'success') {
-                    alert('刪除成功');
-                    loadHistoryList(); // 關鍵：刪除後立即重新整理清單，頁面不需要刷新！
+                    editor.commands.setContent(result.body_content);
+                    window.currentNoteId = id; // 將全域 ID 設為當前點擊的歷史筆記
+
+                    const titleInput = document.querySelector('#note-title');
+                    if (titleInput) {
+                        titleInput.value = result.title || "未命名筆記";
+                    }
+                    // 順帶一提，如果你希望標題也跟著切換，可以在這裡更新 input value：
+                    // document.querySelector('#note-title').value = result.title || "未命名筆記"; 
+                    // (需搭配修改後端 get_note_by_id 回傳 title)
                 }
-            } catch (error) {
-                alert('刪除失敗，請檢查網路連線');
-            }
+            } catch (e) { alert("讀取失敗"); }
         };
+
+        window.deleteNote = async (id) => {
+            if (!confirm('確定刪除？')) return;
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/delete/${id}/`, { method: 'DELETE' });
+                if (response.ok) loadHistoryList();
+            } catch (e) { alert("刪除失敗"); }
+        };
+
+        window.createNewNote = () => {
+            window.currentNoteId = null; // 重置 ID 狀態，表示這是一篇全新的筆記
+
+            const titleInput = document.querySelector('#note-title');
+            if (titleInput) titleInput.value = "";
+
+            editor.commands.clearContent();
+            editor.commands.focus();
+        };
+
+
+        // 初始化
+        loadHistoryList();
     </script>
 </body>
 
