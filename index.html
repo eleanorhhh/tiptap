@@ -145,6 +145,14 @@
             pointer-events: none;
             height: 0;
         }
+        /* 圖片樣式限制 */
+        .editor-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 10px 0;
+            display: block;
+        }
     </style>
 </head>
 
@@ -170,8 +178,11 @@
             <div class="toolbar">
                 <button onclick="toggleBold()"><b>B</b></button>
                 <button onclick="toggleHeading()">H1</button>
+                <button onclick="document.getElementById('image-upload').click()">插入圖片</button>
                 <button onclick="saveContent()" class="save-btn">儲存筆記</button>
             </div>
+
+            <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
 
             <div id="editor" class="editor-container" data-placeholder="輸入 '/' 開啟指令選單..."></div>
         </div>
@@ -186,6 +197,7 @@
         import StarterKit from 'https://esm.sh/@tiptap/starter-kit'
         import Suggestion from 'https://esm.sh/@tiptap/suggestion'
         import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder'
+        import Image from 'https://esm.sh/@tiptap/extension-image'
 
         // Slash Command 擴充邏輯
         const CustomSlashCommand = Extension.create({
@@ -200,6 +212,10 @@
                                 { title: '標題 1', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run() },
                                 { title: '標題 2', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run() },
                                 { title: '粗體文字', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setMark('bold').run() },
+                                { title: '插入圖片', command: ({ editor, range }) => {
+                                    editor.chain().focus().deleteRange(range).run(); // 刪除 / 指令文字
+                                    document.getElementById('image-upload').click(); // 呼叫檔案選擇器
+                                }},
                             ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10)
                         },
                         render: () => {
@@ -258,6 +274,9 @@
                 CustomSlashCommand,
                 Placeholder.configure({
                     placeholder: ({ node }) => document.querySelector('#editor').getAttribute('data-placeholder'),
+                }),
+                Image.configure({
+                    allowBase64: true,
                 }),
             ],
             content: '',
@@ -371,6 +390,21 @@
 
             editor.commands.clearContent();
             editor.commands.focus();
+        };
+
+        window.handleImageUpload = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Src = e.target.result;
+                    // 將轉換好的 Base64 圖片插入到編輯器中
+                    editor.chain().focus().setImage({ src: base64Src }).run();
+                };
+                reader.readAsDataURL(file); // 讀取為 Base64
+            }
+            // 清除 input 的值，確保下次選同一張圖也能觸發
+            event.target.value = ''; 
         };
 
 
