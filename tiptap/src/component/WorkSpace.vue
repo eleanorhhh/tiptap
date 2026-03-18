@@ -15,6 +15,9 @@ import Highlight from '@tiptap/extension-highlight'
 import CodeBlock from '@tiptap/extension-code-block'
 import Image from '@tiptap/extension-image'
 
+// 匯入 SlashMenuList 組件
+import SlashMenuList from './SlashMenuList.vue'
+
 // --- 定義 Toolbar 功能 ---
 const toggleBold = () => editor.value.chain().focus().toggleBold().run()
 const toggleHeading = () => editor.value.chain().focus().toggleHeading({ level: 1 }).run()
@@ -65,10 +68,16 @@ const CustomSlashCommand = Extension.create({
 
           return {
             onStart: props => {
+              if (!props.clientRect) {
+                return
+              }
               // 1. 初始化 VueRenderer
               component = new VueRenderer(SlashMenuList, {
-                props,
-                editor: props.editor,
+                props: {
+                  items: props.items,
+                  command: props.command
+                },
+                editor: this.editor,
               })
 
               // 2. 初始化 Tippy (用來做浮動定位)
@@ -84,15 +93,22 @@ const CustomSlashCommand = Extension.create({
             },
 
             onUpdate(props) {
-              component.updateProps(props)
-              popup[0].setProps({
-                getReferenceClientRect: props.clientRect,
-              })
+              component?.updateProps(props)
+              if (!props.clientRect) {
+                popup?.destroy()
+                popup = null
+                return
+              }
+              if (popup) {
+                popup.setProps({
+                  getReferenceClientRect: props.clientRect,
+                })
+              }
             },
 
             onKeyDown(props) {
               if (props.event.key === 'Escape') {
-                popup[0].hide()
+                popup?.hide()
                 return true
               }
               // 呼叫 Vue 組件內暴露的 onKeyDown 方法
@@ -100,8 +116,8 @@ const CustomSlashCommand = Extension.create({
             },
 
             onExit() {
-              popup[0].destroy()
-              component.destroy()
+              popup?.destroy()
+              component?.destroy()
             },
           }
         },
