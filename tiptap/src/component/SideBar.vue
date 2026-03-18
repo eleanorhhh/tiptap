@@ -1,0 +1,133 @@
+<script setup>
+import {ref , onMounted } from 'vue'
+import axios from 'axios';
+
+const notes = ref([]);
+const isCollapsed = ref(false);
+
+//定義漢堡按鈕的收和狀態
+const toggleSidebar =() =>{
+    isCollapsed.value = !isCollapsed.value;
+}
+//獲取所有的筆記（對應get_all_notes)
+const fetchNotes = async() =>{
+    try{
+        const response = await axios.get('http://127.0.0.1:8000/get_all_notes/')
+        if (response.data.status === 'success'){
+            notes.value = response.data.notes;
+        }
+    } catch(error){
+        console.error("讀取筆記失敗",error);
+    }
+};
+
+//新增筆記（對應save_note,不帶id視為create）
+const createNewNote = async() =>{
+    try{
+        const response = await axios.post('http://127.0.0.1.8000/save_naote/',{
+            title:'新筆記',
+            body_content:''
+        });
+        if(response.data.status === 'success'){
+            await fetchNotes();
+            const newId = response.data.id;
+            console.log("新筆記 ID:",newId);
+        }
+
+        }catch(error){
+            console.error("新增筆記失敗",error);
+
+        }
+};
+
+const deleteNote = async(id) =>{
+    if(!confirm('確定要刪除嗎？')) return;
+    try{
+        const response = await axios.delete('http://127.0.0.1:8000/delete_note/${id}/');
+        if (response.data.status === 'success'){
+            notes.value = notes.value.filter(n => n.id !==id);
+        }
+
+    }catch(error){
+        console.error("刪除失敗",error);
+    }
+};
+onMounted(fetchNotes);
+</script>
+<template>
+    <div class="SiderBar">
+    <button @click="toggleSidebar" class="menu-btn">
+        ☰
+    </button>
+    <div :class="['sidebar',{'collapsed': isCollapsed}]">
+        <div clas="sidebar-inner" v-show="!isCollapsed">
+            <button @click="createNewNote" class="add-note-btn">
+                <span>+</span>新增筆記
+            </button>
+            <h3 class="section-title">歷史頁面</h3>
+            <div id="history-list">
+                <div v-for="note in notes" :key="note.id" class="history-item">
+                    <span class="title">{{ note.title }}</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </div>
+
+</template>
+<style scoped >
+/* 側邊欄佈局結構 */
+   .menu-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: #37352f;
+}
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background-color: #f7f6f3;
+    border-right: 1px solid #edece9;
+    padding: 60px 12px 20px 12px;
+    transition: width 0.3s ease, padding 0.3s ease;
+    overflow-x: hidden; /* 防止收合時文字溢出 */
+}
+
+/* 當 isCollapsed 為 true 時套用的樣式 */
+.sidebar.collapsed {
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    border-right: none;
+}
+
+.sidebar-inner {
+    width: 236px; /* 固定的內部寬度，避免縮放時內容亂跳 */
+}
+
+/* 之前建議的按鈕與清單樣式... */
+.add-note-btn {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    width: 100%;
+    cursor: pointer;
+    font-weight: bold;
+}
+.section-title{
+    font-size: 12px; 
+    color: #91918e; 
+    margin: 0 0 15px 10px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+}
+</style>
