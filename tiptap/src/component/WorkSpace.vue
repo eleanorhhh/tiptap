@@ -78,6 +78,11 @@ const CustomSlashCommand = Extension.create({
                   command: props.command
                 },
                 editor: this.editor,
+                on: {
+                  select: () => {
+                    popup?.hide()
+                  }
+                }
               })
 
               // 2. 初始化 Tippy (用來做浮動定位)

@@ -15,12 +15,14 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, defineEmits } from 'vue'
 
 const props = defineProps({
   items: Array,    // 從 WorkSpace 傳進來的清單
   command: Function, // 點擊後要執行的動作
 })
+
+const emit = defineEmits(['select'])
 
 const selectedIndex = ref(0)
 
@@ -50,6 +52,7 @@ const selectItem = (index) => {
   const item = props.items[index]
   if (item) {
     props.command(item) // 執行 Tiptap 的指令
+    emit('select') // 發射選擇事件
   }
 }
 
