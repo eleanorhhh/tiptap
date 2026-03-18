@@ -139,6 +139,43 @@
         .history-item:hover .del-btn {
             opacity: 1;
         }
+        /* 待辦清單樣式 */
+        ul[data-type="taskList"] {
+            list-style: none;
+            padding: 0;
+        }
+        ul[data-type="taskList"] li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 5px;
+        }
+        ul[data-type="taskList"] li > label {
+            margin-right: 8px;
+            margin-top: 4px;
+        }
+        ul[data-type="taskList"] li > label input {
+            cursor: pointer;
+        }
+        ul[data-type="taskList"] li > div {
+            flex: 1;
+        }
+        /* 程式碼區塊樣式 */
+        pre {
+            background: #f1f1f1;
+            color: #383a42;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        
+        /* 螢光筆樣式 */
+        mark {
+            background-color: #fbe381;
+            border-radius: 2px;
+            padding: 2px 4px;
+        }
 
         /* Slash Menu 樣式 */
         #slash-menu {
@@ -209,6 +246,10 @@
                 <div class="toolbar" style="margin-bottom: 0;">
                     <button onclick="toggleBold()"><b>B</b></button>
                     <button onclick="toggleHeading()">H1</button>
+                    <button onclick="toggleHighlight()">螢光筆</button>
+                    <button onclick="toggleTaskList()">待辦清單</button>
+                    <button onclick="toggleCodeBlock()">程式碼</button>
+                    
                     <button onclick="document.getElementById('image-upload').click()">插入圖片</button>
                     <button onclick="saveContent()" class="save-btn">儲存筆記</button>
                 </div>
@@ -219,6 +260,9 @@
             <div id="editor" class="editor-container" data-placeholder="輸入 '/' 開啟指令選單..."></div>
         </div>
     </div>
+    <div id="slash-menu">
+        <ul id="menu-list"></ul>
+    </div>
 
     <script type="module">
         import { Editor, Extension } from 'https://esm.sh/@tiptap/core'
@@ -226,6 +270,10 @@
         import Suggestion from 'https://esm.sh/@tiptap/suggestion'
         import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder'
         import Image from 'https://esm.sh/@tiptap/extension-image'
+        import TaskList from 'https://esm.sh/@tiptap/extension-task-list'
+        import TaskItem from 'https://esm.sh/@tiptap/extension-task-item'
+        import CodeBlock from 'https://esm.sh/@tiptap/extension-code-block'
+        import Highlight from 'https://esm.sh/@tiptap/extension-highlight'
 
         // Slash Command 擴充邏輯
         const CustomSlashCommand = Extension.create({
@@ -244,6 +292,9 @@
                                     editor.chain().focus().deleteRange(range).run(); // 刪除 / 指令文字
                                     document.getElementById('image-upload').click(); // 呼叫檔案選擇器
                                 }},
+                                { title: '待辦清單', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleTaskList().run() },
+                                { title: '程式碼區塊', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run() },
+                                { title: '螢光筆', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleHighlight().run() },
                             ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10)
                         },
                         render: () => {
@@ -306,6 +357,10 @@
                 Image.configure({
                     allowBase64: true,
                 }),
+                TaskList,
+                TaskItem.configure({ nested: true }),
+                CodeBlock,
+                Highlight,
             ],
             content: '',
             autofocus: true,
@@ -315,6 +370,9 @@
         window.currentNoteId = null;
         window.toggleBold = () => editor.chain().focus().toggleBold().run();
         window.toggleHeading = () => editor.chain().focus().toggleHeading({ level: 1 }).run();
+        window.toggleTaskList = () => editor.chain().focus().toggleTaskList().run();
+        window.toggleCodeBlock = () => editor.chain().focus().toggleCodeBlock().run();
+        window.toggleHighlight = () => editor.chain().focus().toggleHighlight().run();
         window.executeSlash = (index) => {
             const props = window.currentProps;
             if (props && props.items[index]) {
@@ -434,9 +492,7 @@
             // 清除 input 的值，確保下次選同一張圖也能觸發
             event.target.value = ''; 
         };
-        window.currentNoteId = null;
-        window.toggleBold = () => editor.chain().focus().toggleBold().run();
-        window.toggleHeading = () => editor.chain().focus().toggleHeading({ level: 1 }).run();
+        
         
         // 新增側邊欄收合邏輯
         window.toggleSidebar = () => {
