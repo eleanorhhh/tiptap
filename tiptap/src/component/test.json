@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "針對 localhost 啟動 Chrome",
+      "url": "http://localhost:5173", 
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/*",
+        "node_modules/*": "${workspaceFolder}/node_modules/*",
+        "meteor://💻app/*": "${workspaceFolder}/*"
+      }
+    }
+  ]
+}
