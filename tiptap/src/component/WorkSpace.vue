@@ -40,6 +40,10 @@ const handleImageUpload = (event) => {
         reader.readAsDataURL(file)
     }
 }
+const triggerImageUpload = () => {
+    document.getElementById('image-upload').click()
+}
+
 //Extension設定
 const CustomSlashCommand = Extension.create({
   name: 'customSlashCommand',
@@ -57,7 +61,7 @@ const CustomSlashCommand = Extension.create({
             { title: '插入圖片', command: ({ editor, range }) => {
                 editor.chain().focus().deleteRange(range).run();
                 document.getElementById('image-upload').click();
-            }},
+            }},  
             { title: '待辦清單', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleTaskList().run() },
           ].filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10)
         },
@@ -75,7 +79,10 @@ const CustomSlashCommand = Extension.create({
               component = new VueRenderer(SlashMenuList, {
                 props: {
                   items: props.items,
-                  command: props.command
+                  command: props.command,
+                  onSelect: () => {
+                    popup?.hide()
+                  }
                 },
                 editor: this.editor,
                 on: {
@@ -138,6 +145,15 @@ const editor = useEditor({
         StarterKit,
         Placeholder.configure({
             placeholder:"輸入 '/' 開啟指令選單..."
+        }),
+        Highlight,
+        TaskList,
+        TaskItem,
+        Image.configure({
+            allowBase64: true,
+            HTMLAttributes: {
+                class: 'editor-image'
+            }
         })
     ],
     content: '',
@@ -160,7 +176,7 @@ const editor = useEditor({
                     <button @click="toggleTaskList()" class="toolbar-button">待辦清單</button>
                     <button @click="toggleCodeBlock()" class="toolbar-button">程式碼</button>
                     
-                    <button @click="document.getElementById('image-upload').click()" class="toolbar-button">插入圖片</button>
+                    <button @click="triggerImageUpload" class="toolbar-button">插入圖片</button>
                     <button @click="saveContent()" class="save-btn">儲存筆記</button>
                 </div>
             </div>
@@ -251,5 +267,14 @@ const editor = useEditor({
     padding: 20px 0;
     font-size: 16px;
     line-height: 1.6;
+}
+/* 針對編輯器內的圖片設定最大顯示大小 */
+:deep(.editor-image) {
+    max-width: 100%;      /* 確保圖片寬度絕對不會超出編輯器的範圍 */
+    max-height: 400px;    /* 設定圖片的最大高度 (你可以依需求改成 300px 或 500px) */
+    object-fit: contain;  /* 確保圖片縮放時不會變形 */
+    display: block;       /* 讓圖片變成區塊元素，方便排版 */
+    border-radius: 8px;   /* (可選) 讓圖片有一點圓角，看起來更好看 */
+    margin: 10px 0;       /* (可選) 讓圖片上下留一點空白 */
 }
 </style>
