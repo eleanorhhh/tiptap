@@ -44,7 +44,6 @@ const onKeyDown = ({ event }) => {
   }
   if (event.key === 'Enter') {
     selectItem(selectedIndex.value)
-    console.log('選擇了:', props.items[selectedIndex.value])
     return true
   }
   return false
@@ -53,7 +52,6 @@ const onKeyDown = ({ event }) => {
 const selectItem = (index) => {
   const item = props.items[index]
   if (item) {
-    console.log('執行指令:', item)
     props.command(item) // 執行 Tiptap 的指令
     emit('select') // 發射選擇事件
     props.onSelect?.() // 若有外部回呼，則執行（例如關閉選單）

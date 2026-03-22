@@ -53,6 +53,10 @@ const CustomSlashCommand = Extension.create({
       Suggestion({
         editor: this.editor,
         char: '/',
+        // 選單呼叫 props.command(item) 時會走到這裡；必須轉呼叫該項目的 command，否則預設為 null 不會改文件
+        command: ({ editor, range, props: item }) => {
+          item.command({ editor, range })
+        },
         items: ({ query }) => {
           return [
             { title: '標題 1', command: ({ editor, range }) => editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run() },
@@ -92,8 +96,8 @@ const CustomSlashCommand = Extension.create({
                 }
               })
 
-              // 2. 初始化 Tippy (用來做浮動定位)
-              popup = tippy('body', {
+              // 2. 初始化 Tippy（傳 document.body 才會得到單一 Instance；字串選擇器在 v6 會回傳陣列）
+              popup = tippy(document.body, {
                 getReferenceClientRect: props.clientRect,
                 appendTo: () => document.body,
                 content: component.element,
