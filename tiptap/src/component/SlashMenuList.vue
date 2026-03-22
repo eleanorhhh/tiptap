@@ -15,11 +15,12 @@
 </template>
 
 <script setup>
-import { ref, watch, defineEmits } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   items: Array,    // 從 WorkSpace 傳進來的清單
   command: Function, // 點擊後要執行的動作
+  onSelect: Function, // 可選：選取後的回呼（例如用來關閉 popup）
 })
 
 const emit = defineEmits(['select'])
@@ -43,6 +44,7 @@ const onKeyDown = ({ event }) => {
   }
   if (event.key === 'Enter') {
     selectItem(selectedIndex.value)
+    console.log('選擇了:', props.items[selectedIndex.value])
     return true
   }
   return false
@@ -51,8 +53,10 @@ const onKeyDown = ({ event }) => {
 const selectItem = (index) => {
   const item = props.items[index]
   if (item) {
+    console.log('執行指令:', item)
     props.command(item) // 執行 Tiptap 的指令
     emit('select') // 發射選擇事件
+    props.onSelect?.() // 若有外部回呼，則執行（例如關閉選單）
   }
 }
 
