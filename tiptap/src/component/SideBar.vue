@@ -59,7 +59,7 @@ const deleteNote = async(id) =>{
     if(!confirm('確定要刪除嗎？')) return;
     try{
         // 注意：這裡改成反引號 (`) 才能正確解析變數 ${id}
-        const response = await axios.delete(`http://127.0.0.1:8000/delete_note/${id}/`);
+    const response = await axios.delete(`http://127.0.0.1:8000/api/delete_note/${id}/`);
         if (response.data.status === 'success'){
             notes.value = notes.value.filter(n => n.id !==id);
         }
@@ -101,7 +101,7 @@ defineExpose({ fetchNotes });
             :class="{ 'active': currentNoteId === note.id }"
             @click="selectNote(note)"
             >                      
-            <h4>{{ note.title || '未命名筆記' }} </h4>      
+            <h4 class="note-title">{{ note.title || '未命名筆記' }} </h4>      
             <button class="delete-btn" @click.stop="deleteNote(note.id)">x</button>      
         </div>
 

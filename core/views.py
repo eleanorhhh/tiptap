@@ -11,15 +11,13 @@ from django.shortcuts import get_object_or_404
 @require_http_methods(["DELETE"])
 @csrf_exempt
 def delete_note(request, id):
-    if request.method == 'DELETE':
+    try:
+        # 2. 移除重複的 if 判斷，直接刪除
         note = get_object_or_404(Note, id=id) 
         note.delete()
         return JsonResponse({'status': 'success'})
-        try:
-            Note.objects.get(id=note_id).delete()
-            return JsonResponse({'status': 'success'})
-        except:
-            return JsonResponse({'status': 'error'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=404)
 
 @csrf_exempt   
 def save_note(request):
