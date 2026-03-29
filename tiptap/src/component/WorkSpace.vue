@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref ,watch } from 'vue'
+import axios from 'axios'
 import { useEditor, EditorContent, VueRenderer } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -25,9 +26,35 @@ const toggleHighlight = () => editor.value.chain().focus().toggleHighlight().run
 const toggleTaskList = () => editor.value.chain().focus().toggleTaskList().run()
 const toggleCodeBlock = () => editor.value.chain().focus().toggleCodeBlock().run()
 
-const saveContent = () => {
-    console.log("儲存內容：", editor.value.getHTML())
-    alert("內容已儲存！(請對接後端 API)")
+const props = defineProps(['currentNote']) // 接收外部傳來的筆記
+const emit = defineEmits(['note-saved']) // 定義要往外傳的儲存成功事件
+
+const title = ref('')
+
+
+
+const saveContent = async () => {
+    // 檢查是否有選中筆記 (必須要有 ID 才知道要更新哪一篇)
+    if (!props.currentNote || !props.currentNote.id) {
+        alert("請先在左側選擇或新增一篇筆記！");
+        return;
+    }
+
+    try {
+        const response = await axios.post('http://127.0.0.1:8000/api/save/', {
+            id: props.currentNote.id,
+            title: title.value,
+            body_content: editor.value.getHTML() // 抓取 Tiptap 的 HTML 內容
+        });
+        
+        if (response.data.status === 'success') {
+            alert("筆記儲存成功！");
+            emit('note-saved'); // 通知 App.vue 儲存成功了，請側邊欄更新
+        }
+    } catch (error) {
+        console.error("儲存失敗：", error);
+        alert("儲存失敗，請檢查後端連線！");
+    }
 }
 
 const handleImageUpload = (event) => {
@@ -141,7 +168,6 @@ const CustomSlashCommand = Extension.create({
     ]
   },
 })
-const title = ref('')
 
 const editor = useEditor({
     extensions:[
@@ -162,6 +188,22 @@ const editor = useEditor({
     ],
     content: '',
 })
+
+watch(() => props.currentNote, (newNote) => {
+    if (newNote) {
+        title.value = newNote.title || '';
+        // 加上 editor.value 的檢查，避免編輯器還沒準備好就塞資料
+        if (editor.value) {
+            editor.value.commands.setContent(newNote.body_content || ''); 
+        }
+    } else {
+        title.value = '';
+        if (editor.value) {
+            editor.value.commands.setContent('');
+        }
+    }
+}, { immediate: true })
+
 </script>
 <template>
  <div class="editor-workspace">

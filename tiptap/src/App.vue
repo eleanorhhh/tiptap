@@ -1,11 +1,31 @@
 <script setup>
+import { ref } from 'vue';
 import SideBar from './component/SideBar.vue';
 import WorkSpace from './component/WorkSpace.vue';
+
+// 記住目前選中的筆記
+const currentNote = ref(null);
+// 取得 SideBar 元件的參考，用來呼叫它重新讀取筆記
+const sidebarRef = ref(null);
+
+// 當在 SideBar 點擊筆記時觸發
+const handleSelectNote = (note) => {
+  currentNote.value = note;
+};
+
+// 當在 WorkSpace 儲存成功時觸發，通知 SideBar 重新抓取資料
+const handleNoteSaved = () => {
+  if (sidebarRef.value) {
+    sidebarRef.value.fetchNotes();
+  }
+};
 </script>
+
 <template>
 <div class="main-container">
-<SideBar/>
-<WorkSpace/>
+  <SideBar ref="sidebarRef" @select-note="handleSelectNote" />
+  
+  <WorkSpace :currentNote="currentNote" @note-saved="handleNoteSaved" />
 </div>
 </template>
 <style>

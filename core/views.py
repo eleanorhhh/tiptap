@@ -46,6 +46,7 @@ def save_note(request):
         except Exception as e:
             print("❌ 儲存筆記發生錯誤:", str(e))
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': '無效的請求方法'}, status=405)
 
 def get_all_notes(request):
     notes = Note.objects.all().order_by('-created_at')
@@ -61,7 +62,7 @@ def get_all_notes(request):
 
 def note_list(request):
     # 取得所有筆記，按時間倒序排列
-    notes = Note.objects.all().order_order_by('-created_at')
+    notes = Note.objects.all().order_by('-created_at')
     return render(request, 'notes.html', {'notes': notes})
 
 
