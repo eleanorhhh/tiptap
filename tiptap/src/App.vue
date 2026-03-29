@@ -35,7 +35,10 @@ html, body, #app {
   height: 100%;
   width: 100%;
 }
-
+/* 增加全域的 Box Model 設定 */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 .main-container {
   display: flex; /* 讓側邊欄跟內容橫向並排 */
   width: 100vw;

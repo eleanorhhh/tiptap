@@ -240,10 +240,15 @@ watch(() => props.currentNote, (newNote) => {
     </template>
 <style scoped>
 .editor-workspace {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 100px 60px 100px; /* 改為上0, 右100, 下60, 左100 */
-        }
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 100px 60px 100px; 
+    
+    /* 增加以下三行 */
+    box-sizing: border-box; /* 確保 padding 不會額外增加高度 */
+    min-height: 0; /* 覆蓋 Flex 預設行為，避免被內容無限撐大 */
+    height: 100vh; /* 明確綁定高度 */
+}
 .sticky-header {
             position: sticky;
             top: 0;

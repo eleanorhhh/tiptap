@@ -131,6 +131,7 @@ defineExpose({ fetchNotes });
     padding: 60px 12px 20px 12px;
     transition: width 0.3s ease, padding 0.3s ease;
     overflow-x: hidden; /* 防止收合時文字溢出 */
+    box-sizing: border-box; /* 確保 100vh 加上 padding 後不會超出畫面 */
 }
 
 /* 當 isCollapsed 為 true 時套用的樣式 */
