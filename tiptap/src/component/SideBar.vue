@@ -23,22 +23,36 @@ const fetchNotes = async() =>{
 };
 
 //新增筆記（對應save_note,不帶id視為create）
-const createNewNote = async() =>{
-    try{
-        const response = await axios.post('http://127.0.0.1:8000/api/save/',{
-            title:'新筆記',
-            body_content:''
-        });
-        if(response.data.status === 'success'){
-            await fetchNotes();
-            const newId = response.data.id;
-            console.log("新筆記 ID:",newId);
-        }
+const createNewNote = async () => {
+  const baseTitle = "新筆記";
+  let finalTitle = baseTitle;
+  let counter = 1;
 
-        }catch(error){
-            console.error("新增筆記失敗",error);
+  // 檢查名稱是否重複的邏輯
+  // 假設 notes.value 是目前所有的筆記列表
+  const existingTitles = notes.value.map(n => n.title);
 
-        }
+  while (existingTitles.includes(finalTitle)) {
+    finalTitle = `${baseTitle} (${counter})`;
+    counter++;
+  }
+
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/save/', {
+      title: finalTitle, // 使用計算後的名稱
+      body_content: ''
+    });
+    
+    if (response.data.status === 'success') {
+      await fetchNotes();
+      const newNote = notes.value.find(n => n.id === response.data.id);
+      if (newNote) {
+        selectNote(newNote);
+      }
+    }
+  } catch (error) {
+    console.error("建立失敗", error);
+  }
 };
 
 const deleteNote = async(id) =>{
@@ -54,11 +68,16 @@ const deleteNote = async(id) =>{
     }
 };
 
+const currentNoteId = ref(null);
+
 const selectNote = (note) => {
-  emit('select-note', note); // 把整包筆記資料往外傳遞
+  currentNoteId.value = note.id; // 記錄選中的 ID
+  emit('select-note', note);
 };
 
+
 onMounted(fetchNotes);
+defineExpose({ fetchNotes });
 
 
 </script>
@@ -78,9 +97,11 @@ onMounted(fetchNotes);
             v-for="note in notes" 
             :key="note.id" 
             class="note-item"
+            :class="{ 'active': currentNoteId === note.id }"
             @click="selectNote(note)"
             >                      
-            <h4>{{ note.title || '未命名筆記' }}</h4>            </div>
+            <h4>{{ note.title || '未命名筆記' }}</h4>            
+        </div>
 
             </div>
         </div>
@@ -141,5 +162,30 @@ onMounted(fetchNotes);
     margin: 0 0 15px 10px; 
     text-transform: uppercase; 
     letter-spacing: 0.5px;
+}
+.note-item {
+  padding: 12px;
+  margin: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease; /* 動畫核心 */
+  background: transparent;
+}
+
+.note-item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 點擊時的縮放動畫 */
+.note-item:active {
+  transform: scale(0.97);
+}
+
+/* 選中後的樣式 */
+.note-item.active {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-weight: bold;
+  border-left: 4px solid #1976d2;
 }
 </style>
