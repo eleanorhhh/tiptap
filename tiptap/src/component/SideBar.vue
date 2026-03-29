@@ -4,6 +4,7 @@ import axios from 'axios';
 
 const notes = ref([]);
 const isCollapsed = ref(false);
+const emit = defineEmits(['select-note']);
 
 //定義漢堡按鈕的收和狀態
 const toggleSidebar =() =>{
@@ -12,7 +13,7 @@ const toggleSidebar =() =>{
 //獲取所有的筆記（對應get_all_notes)
 const fetchNotes = async() =>{
     try{
-        const response = await axios.get('http://127.0.0.1:8000/get_all_notes/')
+        const response = await axios.get('http://127.0.0.1:8000/api/load_all/')
         if (response.data.status === 'success'){
             notes.value = response.data.notes;
         }
@@ -24,7 +25,7 @@ const fetchNotes = async() =>{
 //新增筆記（對應save_note,不帶id視為create）
 const createNewNote = async() =>{
     try{
-        const response = await axios.post('http://127.0.0.1.8000/save_naote/',{
+        const response = await axios.post('http://127.0.0.1:8000/api/save/',{
             title:'新筆記',
             body_content:''
         });
@@ -52,7 +53,14 @@ const deleteNote = async(id) =>{
         console.error("刪除失敗",error);
     }
 };
+
+const selectNote = (note) => {
+  emit('select-note', note); // 把整包筆記資料往外傳遞
+};
+
 onMounted(fetchNotes);
+
+
 </script>
 <template>
     <div class="SiderBar">
@@ -66,9 +74,13 @@ onMounted(fetchNotes);
             </button>
             <h3 class="section-title">歷史頁面</h3>
             <div id="history-list">
-                <div v-for="note in notes" :key="note.id" class="history-item">
-                    <span class="title">{{ note.title }}</span>
-                </div>
+            <div 
+            v-for="note in notes" 
+            :key="note.id" 
+            class="note-item"
+            @click="selectNote(note)"
+            >                      
+            <h4>{{ note.title || '未命名筆記' }}</h4>            </div>
 
             </div>
         </div>

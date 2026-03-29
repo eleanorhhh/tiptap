@@ -5,7 +5,8 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export const fetchNotes = async () => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/get_all_notes/`);
+        // 將 /get_all_notes/ 改為後端 urls.py 設定的 /api/load_all/
+        const response = await axios.get(`${API_BASE_URL}/api/load_all/`);
         if (response.data.status === 'success') {
             return response.data.notes;
         }
@@ -17,7 +18,8 @@ export const fetchNotes = async () => {
 
 export const createNote = async (title, body_content) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/save_note/`, {
+        // 將 /save_note/ 改為後端 urls.py 設定的 /api/save/
+        const response = await axios.post(`${API_BASE_URL}/api/save/`, {
             title,
             body_content
         });
@@ -32,7 +34,8 @@ export const createNote = async (title, body_content) => {
 
 export const deleteNote = async (id) => {
     try {
-        const response = await axios.delete(`${API_BASE_URL}/delete_note/${id}/`);
+        // 將 /delete_note/${id}/ 改為後端 urls.py 設定的 /api/delete/${id}/
+        const response = await axios.delete(`${API_BASE_URL}/api/delete/${id}/`);
         if (response.data.status === 'success') {
             return true;
         }

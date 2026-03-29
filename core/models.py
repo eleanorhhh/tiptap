@@ -13,8 +13,7 @@ class Note(models.Model):
     title = models.CharField(max_length=200, default="未命名筆記")
     
     # 儲存 Tiptap 傳來的整包 JSON 內容
-    content_json = models.JSONField(null=True, blank=True)
-    
+    content_json = models.TextField(null=True, blank=True)        
     # 建立時間：只有在新增 (Create) 時會自動記錄
     created_at = models.DateTimeField(auto_now_add=True)
     

@@ -15,12 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path , include
 from django.views.generic import TemplateView # 新增這行
 from core.views import save_note,get_all_notes,delete_note,get_note_by_id
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include('core.urls')), # 將 /api/ 開頭的請求交給 core App 處理
     path('api/save/', save_note),
     # 新增下面這行，把首頁對接到 index.html
     path('', TemplateView.as_view(template_name='index.html')), 

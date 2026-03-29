@@ -44,6 +44,7 @@ def save_note(request):
         except Note.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': '找不到指定的筆記進行更新'}, status=404)
         except Exception as e:
+            print("❌ 儲存筆記發生錯誤:", str(e))
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 def get_all_notes(request):
