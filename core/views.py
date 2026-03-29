@@ -4,12 +4,17 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Note
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
+from .models import Note
+from django.shortcuts import get_object_or_404
 
 
 @require_http_methods(["DELETE"])
 @csrf_exempt
-def delete_note(request, note_id):
+def delete_note(request, id):
     if request.method == 'DELETE':
+        note = get_object_or_404(Note, id=id) 
+        note.delete()
+        return JsonResponse({'status': 'success'})
         try:
             Note.objects.get(id=note_id).delete()
             return JsonResponse({'status': 'success'})

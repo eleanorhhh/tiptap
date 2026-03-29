@@ -58,7 +58,8 @@ const createNewNote = async () => {
 const deleteNote = async(id) =>{
     if(!confirm('確定要刪除嗎？')) return;
     try{
-        const response = await axios.delete('http://127.0.0.1:8000/delete_note/${id}/');
+        // 注意：這裡改成反引號 (`) 才能正確解析變數 ${id}
+        const response = await axios.delete(`http://127.0.0.1:8000/delete_note/${id}/`);
         if (response.data.status === 'success'){
             notes.value = notes.value.filter(n => n.id !==id);
         }
@@ -100,7 +101,8 @@ defineExpose({ fetchNotes });
             :class="{ 'active': currentNoteId === note.id }"
             @click="selectNote(note)"
             >                      
-            <h4>{{ note.title || '未命名筆記' }}</h4>            
+            <h4>{{ note.title || '未命名筆記' }} </h4>      
+            <button class="delete-btn" @click.stop="deleteNote(note.id)">x</button>      
         </div>
 
             </div>
@@ -165,12 +167,15 @@ defineExpose({ fetchNotes });
     letter-spacing: 0.5px;
 }
 .note-item {
+  display: flex;
+  justify-content: space-between; /* 讓標題靠左，按鈕靠右 */
+  align-items: center; /* 讓兩者垂直置中對齊 */
+  
+  /* 這些保留你原本的設定 */
   padding: 12px;
-  margin: 4px 8px;
+  margin-bottom: 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease; /* 動畫核心 */
-  background: transparent;
 }
 
 .note-item:hover {
@@ -189,4 +194,51 @@ defineExpose({ fetchNotes });
   font-weight: bold;
   border-left: 4px solid #1976d2;
 }
+/* 針對標題的設定 */
+.note-title {
+  margin: 0; /* 【關鍵】清除 h4 預設的上下邊距，才不會撐壞排版或換行 */
+  flex: 1; /* 讓標題佔滿左側剩下的空間 */
+  
+  /* 如果標題太長，變成 ... 而不會把叉叉擠到外面 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+/* 針對叉叉按鈕的設定 */
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px; /* 跟左邊的標題保持一點距離 */
+  color: #999; /* 預設顏色 */
+  display: none; /* 如果你希望 hover 才顯示，就加上這行 */
+}
+
+/* 滑鼠移過去才顯示叉叉（依你的需求決定要不要加） */
+.note-item:hover .delete-btn {
+  display: block;
+}
+
+.delete-btn:hover {
+  color: #ff4d4f; /* 滑鼠移到叉叉上變紅色 */
+}
+
+.delete-btn {
+  display: none; /* 預設隱藏 */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+/* 當滑鼠移到筆記項目 (note-item) 上時，才顯示刪除按鈕 */
+.note-item:hover .delete-btn {
+  display: block;
+}
+
 </style>
