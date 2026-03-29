@@ -1,5 +1,3 @@
-
-```markdown
 # Notion-like Editor (Tiptap + Django + Vue 3)
 
 這是一個具備豐富文字編輯功能的類 Notion 筆記應用程式。前端採用 Vue 3 與 Vite 建構，並整合 Tiptap 編輯器；後端則使用 Django 框架提供 API 服務，支援筆記的完整 CRUD (新增、讀取、更新、刪除) 功能。
